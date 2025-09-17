@@ -100,7 +100,7 @@ export function createCalculator() {
     const x = display;
 
     if (operator === OPERATORS.DIV && x === 0) {
-      display = ERROR_TEXT;
+      display = ERROR;
       operator = null;
       waiting = true;
       accumulator = 0;
