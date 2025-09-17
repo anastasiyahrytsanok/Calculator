@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Calculator (Command)</title>
+  </head>
+  <body>
+    <main class="page">
+      <h1 class="page__title">Calculator</h1>
+
+      <section class="calc">
+        <div class="calc__exp" aria-live="polite">0</div>
+
+        <div class="calc__keys" role="group">
+          <button data-cmd="digit" data-arg="7">7</button>
+          <button data-cmd="digit" data-arg="8">8</button>
+          <button data-cmd="digit" data-arg="9">9</button>
+          <button data-cmd="op" data-arg="div">÷</button>
+
+          <button data-cmd="digit" data-arg="4">4</button>
+          <button data-cmd="digit" data-arg="5">5</button>
+          <button data-cmd="digit" data-arg="6">6</button>
+          <button data-cmd="op" data-arg="mul">×</button>
+
+          <button data-cmd="digit" data-arg="1">1</button>
+          <button data-cmd="digit" data-arg="2">2</button>
+          <button data-cmd="digit" data-arg="3">3</button>
+          <button data-cmd="op" data-arg="sub">−</button>
+
+          <button data-cmd="digit" data-arg="0">0</button>
+          <button data-cmd="dot">.</button>
+          <button data-cmd="op" data-arg="add">+</button>
+
+          <button data-cmd="eq">=</button>
+          <button data-cmd="clear">C</button>
+          <button data-cmd="percent">%</button>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

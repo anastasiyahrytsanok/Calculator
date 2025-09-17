@@ -1,0 +1,24 @@
+.page {
+  padding: 16px;
+  font-family: system-ui, sans-serif;
+}
+.calc {
+  width: 240px;
+}
+.calc__display {
+  border: 1px solid #ccc;
+  padding: 8px;
+  margin-bottom: 8px;
+  text-align: right;
+  min-height: 32px;
+  display: grid;
+  gap: 4px;
+}
+.calc__keys {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+button {
+  padding: 10px;
+}
