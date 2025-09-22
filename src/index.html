@@ -13,28 +13,45 @@
         <div class="calc__exp" aria-live="polite">0</div>
 
         <div class="calc__keys" role="group">
+          <button data-cmd="memory-clear">MC</button>
+          <button data-cmd="memory-plus">M+</button>
+          <button data-cmd="memory-minus">M-</button>
+          <button data-cmd="memory-recall">MR</button>
+
           <button data-cmd="digit" data-arg="7">7</button>
           <button data-cmd="digit" data-arg="8">8</button>
           <button data-cmd="digit" data-arg="9">9</button>
           <button data-cmd="op" data-arg="div">÷</button>
+
+          <button data-cmd="square">x<sup>2</sup></button>
+          <button data-cmd="cube">x<sup>3</sup></button>
+          <button data-cmd="degree">x<sup>y</sup></button>
+          <button data-cmd="ten-to-degree">10<sup>x</sup></button>
 
           <button data-cmd="digit" data-arg="4">4</button>
           <button data-cmd="digit" data-arg="5">5</button>
           <button data-cmd="digit" data-arg="6">6</button>
           <button data-cmd="op" data-arg="mul">×</button>
 
+          <button data-cmd="square-radical"><sup>2</sup>&#8730;x</button>
+          <button data-cmd="cube-radical"><sup>3</sup>&#8730;x</button>
+          <button data-cmd="y-radical"><sup>y</sup>&#8730;x</button>
+          <button data-cmd="divide-one">1/x</button>
+
           <button data-cmd="digit" data-arg="1">1</button>
           <button data-cmd="digit" data-arg="2">2</button>
           <button data-cmd="digit" data-arg="3">3</button>
           <button data-cmd="op" data-arg="sub">−</button>
 
-          <button data-cmd="digit" data-arg="0">0</button>
-          <button data-cmd="dot">.</button>
-          <button data-cmd="op" data-arg="add">+</button>
-
-          <button data-cmd="eq">=</button>
-          <button data-cmd="clear">C</button>
           <button data-cmd="percent">%</button>
+          <button data-cmd="factorial">!x</button>
+          <button data-cmd="sign-change">+/-</button>
+          <button data-cmd="clear">C</button>
+
+          <button data-cmd="dot">.</button>
+          <button data-cmd="digit" data-arg="0">0</button>
+          <button data-cmd="op" data-arg="add">+</button>
+          <button data-cmd="eq">=</button>
         </div>
       </section>
     </main>

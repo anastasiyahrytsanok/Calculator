@@ -1,10 +1,34 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
 .page {
-  padding: 16px;
+  padding-top: 100px;
   font-family: system-ui, sans-serif;
+  background-color: rgb(44, 45, 52);
+  height: 100vh;
+  color: rgb(255, 255, 255);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
+
+.page__title {
+  font-size: 50px;
+  text-align: center;
+  margin-bottom: 50px;
+}
+
 .calc {
-  width: 240px;
+  width: 100%;
+  max-width: 670px;
+  padding: 2px;
+  border: 2px solid rgb(68, 69, 78);
+  border-radius: 10px;
 }
+
 .calc__display {
   border: 1px solid #ccc;
   padding: 8px;
@@ -16,9 +40,40 @@
 }
 .calc__keys {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
 }
+
+.calc__exp {
+  padding: 15px;
+  font-size: 50px;
+}
+
 button {
   padding: 10px;
+  height: 60px;
+  width: 80px;
+  font-size: 20px;
+  border-radius: 10px;
+  border: 1px solid rgb(0, 0, 0);
+  background-color: rgb(86, 86, 90);
+  color: rgb(255, 255, 255);
+}
+
+button.active {
+  background-color: rgb(138, 138, 140);
+}
+
+[data-cmd='digit'],
+[data-cmd='dot'] {
+  background-color: rgb(108, 108, 113);
+}
+
+[data-cmd='op'],
+[data-cmd='eq'] {
+  background-color: rgb(137, 113, 86);
+}
+
+[data-cmd='clear'] {
+  background-color: rgb(137, 86, 86);
 }
