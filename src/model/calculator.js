@@ -1,513 +1,490 @@
-import { OPERATORS, OPERATORS_SYMBOLS, ERROR, ZERO, DOT, RADICAL_SYMBOL } from '../constants.js';
+import {
+  OPERATORS,
+  OPERATORS_SYMBOLS,
+  ERROR,
+  ZERO,
+  DOT,
+  RADICAL_SYMBOL,
+  MAX_NUMBER_LENGTH,
+  MAX_FACTORIAL_NUMBER,
+} from '../constants.js';
+import { toSymbol, isEven, normalizeResult } from '../utils.js';
 
-export function createCalculator() {
-  let currentInput = ZERO,
-    accumulator = ZERO,
-    operator = null,
-    isWaitingForArgument = true,
-    isEnteringDegree = false,
-    degree = null,
-    isEnteringRadical = false,
-    radical = null,
-    memorizedValue = ZERO,
-    isValueMemorized = false;
+export class CreateCalculator {
+  #currentInput;
+  #accumulator;
+  #operator;
+  #isWaitingForArgument;
+  #isEnteringDegree;
+  #degree;
+  #isEnteringRadical;
+  #radical;
+  #memorizedValue;
+  isValueMemorized;
 
-  const memoryRecallButton = document.querySelector('[data-cmd="memory-recall"]');
-
-  function getExpression() {
-    if (isError()) return ERROR;
-
-    const operatorSymbol = toSymbol(operator);
-
-    if (!operator) return getTransformedCurrentInput();
-
-    if (isWaitingForArgument) return `${accumulator} ${operatorSymbol}`;
-
-    if (currentInput === OPERATORS_SYMBOLS.SUB)
-      return `${accumulator} ${operatorSymbol} ${OPERATORS_SYMBOLS.SUB}`;
-
-    return `${accumulator} ${operatorSymbol} ${getTransformedCurrentInput()}`;
-
-    function getTransformedCurrentInput() {
-      if (isEnteringDegree && degree) {
-        return `${currentInput}<sup>${degree}</sup>`;
-      } else if (isEnteringRadical) {
-        return radical === null
-          ? `${RADICAL_SYMBOL}${currentInput}`
-          : `<sup>${radical}</sup>${RADICAL_SYMBOL}${currentInput}`;
-      } else {
-        return currentInput;
-      }
-    }
+  constructor() {
+    this.#currentInput = ZERO;
+    this.#accumulator = ZERO;
+    this.#operator = null;
+    this.#isWaitingForArgument = true;
+    this.#isEnteringDegree = false;
+    this.#degree = null;
+    this.#isEnteringRadical = false;
+    this.#radical = null;
+    this.#memorizedValue = ZERO;
+    this.isValueMemorized = false;
   }
 
-  //переписать
-  function inputDigit(digit) {
-    if (isEnteringDegree) {
-      if (isError()) {
-        degree = digit === DOT ? `${ZERO}${DOT}` : digit;
-        accumulator = 0;
-        operator = null;
-        isWaitingForArgument = false;
-        return;
-      }
+  getExpression() {
+    if (this.isError()) return ERROR;
 
-      if (digit === DOT && degree.toString().includes(DOT) && !operator) return;
+    const operatorSymbol = toSymbol(this.#operator);
 
-      if (digit === DOT && degree === OPERATORS_SYMBOLS.SUB) {
-        degree = OPERATORS_SYMBOLS.SUB + `${ZERO}${DOT}`;
-        return;
-      }
+    if (!this.#operator) return this.getTransformedCurrentInput();
 
-      if (isWaitingForArgument) {
-        degree = digit === DOT ? `${ZERO}${DOT}` : digit;
-        isWaitingForArgument = false;
-      } else if (degree === ZERO && digit !== DOT) {
-        degree = digit;
-      } else degree = degree === null && digit !== DOT ? digit : degree + digit;
+    if (this.#isWaitingForArgument) return `${this.#accumulator} ${operatorSymbol}`;
 
-      return;
-    }
+    if (this.#currentInput === OPERATORS_SYMBOLS.SUB)
+      return `${this.#accumulator} ${operatorSymbol} ${OPERATORS_SYMBOLS.SUB}`;
 
-    if (isEnteringRadical) {
-      if (isError()) {
-        radical = digit === DOT ? `${ZERO}${DOT}` : digit;
-        accumulator = 0;
-        operator = null;
-        isWaitingForArgument = false;
-        return;
-      }
+    return `${this.#accumulator} ${operatorSymbol} ${this.getTransformedCurrentInput()}`;
+  }
 
-      if (digit === DOT && radical.toString().includes(DOT) && !operator) return;
-
-      if (digit === DOT && radical === OPERATORS_SYMBOLS.SUB) {
-        radical = OPERATORS_SYMBOLS.SUB + `${ZERO}${DOT}`;
-        return;
-      }
-
-      if (isWaitingForArgument) {
-        radical = digit === DOT ? `${ZERO}${DOT}` : digit;
-        isWaitingForArgument = false;
-      } else if (radical === ZERO && digit !== DOT) {
-        radical = digit;
-      } else radical = radical === null && digit !== DOT ? digit : radical + digit;
-
-      return;
-    }
-
-    if (isError()) {
-      currentInput = digit === DOT ? `${ZERO}${DOT}` : digit;
-      accumulator = 0;
-      operator = null;
-      isWaitingForArgument = false;
-      return;
-    }
-
-    if (digit === DOT && currentInput.toString().includes(DOT) && !operator) return;
-
-    if (digit === DOT && currentInput === OPERATORS_SYMBOLS.SUB) {
-      currentInput = OPERATORS_SYMBOLS.SUB + `${ZERO}${DOT}`;
-      return;
-    }
-
-    if (isWaitingForArgument) {
-      currentInput = digit === DOT ? `${ZERO}${DOT}` : digit;
-      isWaitingForArgument = false;
+  getTransformedCurrentInput() {
+    if (this.#isEnteringDegree && this.#degree) {
+      return `${this.#currentInput}<sup>${this.#degree}</sup>`;
+    } else if (this.#isEnteringRadical) {
+      return this.#radical === null
+        ? `${RADICAL_SYMBOL}${this.#currentInput}`
+        : `<sup>${this.#radical}</sup>${RADICAL_SYMBOL}${this.#currentInput}`;
     } else {
-      currentInput = currentInput === ZERO && digit !== DOT ? digit : currentInput + digit;
+      return this.#currentInput;
     }
   }
 
-  function setOperator(nextOperator) {
-    if (isError()) return;
+  inputDigit(digit) {
+    if (this.#currentInput?.length >= MAX_NUMBER_LENGTH) return;
 
-    if (isEnteringDegree) {
-      if (nextOperator === OPERATORS.SUB && !degree) {
-        degree = OPERATORS_SYMBOLS.SUB;
+    if (this.#isEnteringDegree) {
+      this.#degree = this.applyDigit(this.#degree, digit);
+      return;
+    }
+
+    if (this.#isEnteringRadical) {
+      this.#radical = this.applyDigit(this.#radical, digit);
+      return;
+    }
+
+    this.#currentInput = this.applyDigit(this.#currentInput, digit);
+  }
+
+  applyDigit(value, digit) {
+    if (this.isError()) {
+      this.#accumulator = 0;
+      this.#operator = null;
+      this.#isWaitingForArgument = false;
+      return digit === DOT ? `${ZERO}${DOT}` : digit;
+    }
+
+    const currentValue = String(value);
+
+    if (digit === DOT && !this.#operator && currentValue.includes(DOT)) return currentValue;
+
+    if (digit === DOT && currentValue === OPERATORS_SYMBOLS.SUB)
+      return OPERATORS_SYMBOLS.SUB + `${ZERO}${DOT}`;
+
+    if (this.#isWaitingForArgument) {
+      this.#isWaitingForArgument = false;
+      return digit === DOT ? `${ZERO}${DOT}` : digit;
+    }
+
+    if ((currentValue === ZERO || currentValue === '' || value === null) && digit !== DOT)
+      return digit;
+
+    return currentValue + digit;
+  }
+
+  setOperator(nextOperator) {
+    if (this.#isEnteringDegree) {
+      if (nextOperator === OPERATORS.SUB && !this.#degree) {
+        this.#degree = OPERATORS_SYMBOLS.SUB;
         return;
       }
 
-      calculateDegree();
+      this.calculateDegree();
     }
 
-    if (isEnteringRadical) {
-      if (nextOperator === OPERATORS.SUB && !radical) {
-        radical = OPERATORS_SYMBOLS.SUB;
+    if (this.#isEnteringRadical) {
+      if (nextOperator === OPERATORS.SUB && !this.#radical) {
+        this.#radical = OPERATORS_SYMBOLS.SUB;
         return;
       }
 
-      calculateRadical();
+      this.calculateRadical();
     }
 
-    transformZeroDotToZero();
+    if (this.isError()) return;
 
-    if (isWaitingForArgument) {
-      const isOperatorSet = operator != null;
+    this.transformZeroDotToZero();
+
+    if (this.#isWaitingForArgument) {
+      const isOperatorSet = this.#operator != null;
 
       if (isOperatorSet && nextOperator === OPERATORS.SUB) {
-        if (currentInput !== OPERATORS_SYMBOLS.SUB) {
-          currentInput = OPERATORS_SYMBOLS.SUB;
-          isWaitingForArgument = false;
+        if (this.#currentInput !== OPERATORS_SYMBOLS.SUB) {
+          this.#currentInput = OPERATORS_SYMBOLS.SUB;
+          this.#isWaitingForArgument = false;
         }
       } else {
-        operator = nextOperator;
+        this.#operator = nextOperator;
       }
+
       return;
     }
 
-    if (currentInput === OPERATORS_SYMBOLS.SUB) {
-      operator = nextOperator;
-      isWaitingForArgument = true;
-      currentInput = String(accumulator);
+    if (this.#currentInput === OPERATORS_SYMBOLS.SUB) {
+      this.#operator = nextOperator;
+      this.#isWaitingForArgument = true;
+      this.#currentInput = String(this.#accumulator);
       return;
     }
 
-    if (operator === OPERATORS.DIV && currentInput === 0) {
-      currentInput = ERROR;
-      operator = null;
-      isWaitingForArgument = true;
-      accumulator = 0;
-      return;
+    try {
+      this.#accumulator = this.#operator
+        ? this.compute(this.#accumulator, this.#currentInput, this.#operator)
+        : Number(this.#currentInput);
+      this.#operator = nextOperator;
+      this.#isWaitingForArgument = true;
+      this.#currentInput = null;
+    } catch {
+      this.#currentInput = ERROR;
+      this.#operator = null;
+      this.#isWaitingForArgument = true;
+      this.#accumulator = 0;
     }
-
-    accumulator = operator ? compute(accumulator, currentInput, operator) : Number(currentInput);
-    operator = nextOperator;
-    isWaitingForArgument = true;
-    currentInput = null;
   }
 
-  function equals() {
-    if (isEnteringDegree) {
-      calculateDegree();
+  equals() {
+    if (this.#isEnteringDegree) {
+      this.calculateDegree();
     }
 
-    if (isEnteringRadical) {
-      calculateRadical();
+    if (this.#isEnteringRadical) {
+      this.calculateRadical();
     }
 
-    if (isError() || !operator || isWaitingForArgument || currentInput === OPERATORS_SYMBOLS.SUB)
+    if (
+      this.isError() ||
+      !this.#operator ||
+      this.#isWaitingForArgument ||
+      this.#currentInput === OPERATORS_SYMBOLS.SUB
+    )
       return;
 
-    const x = currentInput;
-
-    if (operator === OPERATORS.DIV && x === 0) {
-      currentInput = ERROR;
-      operator = null;
-      isWaitingForArgument = true;
-      accumulator = 0;
-      return;
+    try {
+      this.#accumulator = this.compute(this.#accumulator, this.#currentInput, this.#operator);
+      this.#currentInput = String(this.#accumulator);
+      this.#operator = null;
+      this.#isWaitingForArgument = true;
+    } catch {
+      this.#currentInput = ERROR;
+      this.#operator = null;
+      this.#isWaitingForArgument = true;
+      this.#accumulator = 0;
     }
-
-    accumulator = compute(accumulator, x, operator);
-    currentInput = String(accumulator);
-    operator = null;
-    isWaitingForArgument = true;
   }
 
-  function clearAll() {
-    currentInput = ZERO;
-    accumulator = 0;
-    operator = null;
-    isWaitingForArgument = true;
-    isEnteringDegree = false;
-    degree = null;
-    isEnteringRadical = false;
-    radical = null;
+  clearAll() {
+    this.#currentInput = ZERO;
+    this.#accumulator = 0;
+    this.#operator = null;
+    this.#isWaitingForArgument = true;
+    this.#isEnteringDegree = false;
+    this.#degree = null;
+    this.#isEnteringRadical = false;
+    this.#radical = null;
   }
 
-  function percent() {
-    if (isError()) return;
+  percent() {
+    if (this.isError()) return;
 
-    transformZeroDotToZero();
+    this.transformZeroDotToZero();
 
-    // TODO: maybe just set ERROR in that case
-    if (currentInput === OPERATORS_SYMBOLS.SUB && !!operator) {
-      accumulator /= 100;
-      currentInput = String(accumulator);
-      operator = null;
-      isWaitingForArgument = true;
+    if (this.#currentInput === OPERATORS_SYMBOLS.SUB && !!this.#operator) {
+      this.#accumulator /= 100;
+      this.#currentInput = String(this.#accumulator);
+      this.#operator = null;
+      this.#isWaitingForArgument = true;
       return;
     }
 
-    const isOperationEntered = !!operator && !isWaitingForArgument;
+    const isOperationEntered = !!this.#operator && !this.#isWaitingForArgument;
 
     if (!isOperationEntered) {
-      accumulator = Number(currentInput) / 100;
+      this.#accumulator = Number(this.#currentInput) / 100;
     } else {
-      const currentInputPercent = Number(currentInput) / 100;
+      const currentInputPercent = Number(this.#currentInput) / 100;
 
-      switch (operator) {
+      switch (this.#operator) {
         case OPERATORS.PLUS: {
-          const percentValue = accumulator * currentInputPercent;
-          accumulator = accumulator + percentValue;
+          const percentValue = this.#accumulator * currentInputPercent;
+          this.#accumulator = this.#accumulator + percentValue;
           break;
         }
         case OPERATORS.SUB: {
-          const percentValue = accumulator * currentInputPercent;
-          accumulator = accumulator - percentValue;
+          const percentValue = this.#accumulator * currentInputPercent;
+          this.#accumulator = this.#accumulator - percentValue;
           break;
         }
         case OPERATORS.MUL: {
-          accumulator = accumulator * currentInputPercent;
+          this.#accumulator = this.#accumulator * currentInputPercent;
           break;
         }
         case OPERATORS.DIV: {
-          accumulator = accumulator / currentInputPercent;
+          this.#accumulator = this.#accumulator / currentInputPercent;
           break;
         }
       }
     }
 
-    currentInput = String(accumulator);
-    operator = null;
-    isWaitingForArgument = true;
+    this.#currentInput = normalizeResult(this.#accumulator);
+    this.#operator = null;
+    this.#isWaitingForArgument = true;
   }
 
-  function signChange() {
-    if (isError() || (operator && !currentInput)) return;
+  signChange() {
+    if (this.isError() || (this.#operator && !this.#currentInput)) return;
 
-    if (currentInput === OPERATORS_SYMBOLS.SUB) {
-      currentInput = '';
+    if (this.#currentInput === OPERATORS_SYMBOLS.SUB) {
+      this.#currentInput = '';
       return;
     }
 
-    if (currentInput) {
-      currentInput = Number(currentInput) * -1;
+    if (this.#currentInput) {
+      this.#currentInput = (Number(this.#currentInput) * -1).toString();
       return;
     }
   }
 
-  ///remove
-  function printState() {
-    console.log({ currentInput, accumulator, operator, isWaitingForArgument });
-  }
-
-  function toSquare() {
-    toDegree();
-    degree = 2;
+  toSquare() {
+    this.toDegree();
+    this.#degree = 2;
     return;
   }
 
-  function toCube() {
-    toDegree();
-    degree = 3;
+  toCube() {
+    this.toDegree();
+    this.#degree = 3;
     return;
   }
 
-  function toDegree() {
-    if (isError() || (!!operator && isWaitingForArgument) || currentInput === OPERATORS_SYMBOLS.SUB)
+  toDegree() {
+    if (
+      this.isError() ||
+      (!!this.#operator && this.#isWaitingForArgument) ||
+      this.#currentInput === OPERATORS_SYMBOLS.SUB
+    )
       return;
 
-    transformZeroDotToZero();
+    this.transformZeroDotToZero();
 
-    isEnteringDegree = true;
+    this.#isEnteringDegree = true;
   }
 
-  function tenToDegree() {
-    toDegree();
-    degree = currentInput;
-    currentInput = 10;
+  tenToDegree() {
+    this.toDegree();
+    this.#degree = this.#currentInput;
+    this.#currentInput = 10;
   }
 
-  function divideOne() {
-    if (isError() || (!currentInput && operator)) return;
+  inverse() {
+    if (this.isError() || (!this.#currentInput && this.#operator)) return;
 
-    if (Number(currentInput) === 0) {
-      currentInput = ERROR;
+    if (this.#currentInput) {
+      try {
+        this.#currentInput = this.compute(1, this.#currentInput, OPERATORS.DIV);
+      } catch {
+        this.#currentInput = ERROR;
+      }
+    }
+  }
+
+  factorial() {
+    if (this.isError() || (!this.#currentInput && this.#operator)) return;
+
+    const currentInputNumber = Number(this.#currentInput);
+    if (currentInputNumber > MAX_FACTORIAL_NUMBER) {
+      this.#currentInput = ERROR;
       return;
     }
 
-    if (currentInput) {
-      currentInput = 1 / Number(currentInput);
-      return;
-    }
-  }
-
-  function factorial() {
-    if (isError() || (!currentInput && operator)) return;
-
-    if (currentInput) {
-      if (Number(currentInput) < 0 || !Number.isInteger(Number(currentInput))) {
-        currentInput = ERROR;
-      } else if (Number(currentInput) === 0 || Number(currentInput) === 1) {
-        currentInput = 1;
+    if (this.#currentInput) {
+      if (currentInputNumber < 0 || !Number.isInteger(currentInputNumber)) {
+        this.#currentInput = ERROR;
+      } else if (currentInputNumber === 0 || currentInputNumber === 1) {
+        this.#currentInput = '1';
       } else {
-        const initialValue = Number(currentInput);
-        for (let i = 2; i < Number(initialValue); i++) {
-          currentInput *= i;
+        for (let i = 2; i < currentInputNumber; i++) {
+          this.#currentInput = normalizeResult(this.#currentInput * i);
         }
       }
     }
   }
 
-  function squareRadical() {
-    toRadical();
-    radical = 2;
+  squareRadical() {
+    this.toRadical();
+    this.#radical = 2;
   }
 
-  function cubeRadical() {
-    toRadical();
-    radical = 3;
+  cubeRadical() {
+    this.toRadical();
+    this.#radical = 3;
   }
 
-  function toRadical() {
-    if (isError() || (!!operator && isWaitingForArgument) || currentInput === OPERATORS_SYMBOLS.SUB)
-      return;
-
-    transformZeroDotToZero();
-
-    isEnteringRadical = true;
-  }
-
-  function calculateDegree() {
-    if (degree !== OPERATORS_SYMBOLS.SUB) {
-      currentInput = currentInput ** degree;
-    }
-
-    isEnteringDegree = false;
-    degree = null;
-  }
-
-  function calculateRadical() {
-    if (isEnteringRadical && !radical) {
-      radical = 2;
-    }
-
-    if (radical && isEven(radical) && currentInput < ZERO) {
-      currentInput = ERROR;
-      return;
-    }
-
-    if (radical !== OPERATORS_SYMBOLS.SUB) {
-      currentInput = Number((currentInput ** (1 / radical)).toFixed(12)).toString();
-    }
-
-    isEnteringRadical = false;
-    radical = null;
-  }
-
-  function memoryClear() {
-    memorizedValue = ZERO;
-    isValueMemorized = false;
-    updateMemoryRecallButtonStyle();
-  }
-
-  function memoryPlus() {
-    changeMemorizedValue(OPERATORS.PLUS);
-  }
-
-  function memoryMinus() {
-    changeMemorizedValue(OPERATORS.SUB);
-  }
-
-  function memoryRecall() {
-    if (!isValueMemorized) {
-      return;
-    }
-
-    if (operator && isWaitingForArgument) {
-      inputDigit(memorizedValue.toString());
-      return;
-    }
-
-    if (accumulator && operator && currentInput) {
-      equals();
-    }
-
-    if (currentInput === ZERO || currentInput === `${ZERO}${DOT}` || !currentInput) {
-      currentInput = memorizedValue;
-    } else {
-      setOperator(OPERATORS.MUL);
-      inputDigit(memorizedValue.toString());
-    }
-  }
-
-  function isError() {
-    return currentInput === ERROR;
-  }
-
-  function transformZeroDotToZero() {
-    if (currentInput === `${ZERO}${DOT}`) {
-      currentInput = ZERO;
-    }
-  }
-
-  function changeMemorizedValue(operator) {
-    if (isError() || (operator && isWaitingForArgument)) {
-      return;
-    }
+  toRadical() {
     if (
-      ((accumulator || accumulator === Number(ZERO)) && operator && currentInput) ||
-      degree ||
-      isEnteringRadical
-    ) {
-      equals();
+      this.isError() ||
+      (!!this.#operator && this.#isWaitingForArgument) ||
+      this.#currentInput === OPERATORS_SYMBOLS.SUB
+    )
+      return;
+
+    this.transformZeroDotToZero();
+
+    this.#isEnteringRadical = true;
+  }
+
+  calculateDegree() {
+    if (this.#degree !== OPERATORS_SYMBOLS.SUB) {
+      this.#currentInput = normalizeResult(this.#currentInput ** this.#degree);
     }
 
-    memorizedValue =
+    this.#isEnteringDegree = false;
+    this.#degree = null;
+  }
+
+  calculateRadical() {
+    if (this.#isEnteringRadical && !this.#radical) {
+      this.#radical = 2;
+    }
+
+    const currentInputNumber = Number(this.#currentInput);
+
+    if (this.#radical && isEven(this.#radical) && currentInputNumber < 0) {
+      this.#currentInput = ERROR;
+      return;
+    }
+
+    if (this.#radical !== OPERATORS_SYMBOLS.SUB) {
+      if (currentInputNumber < 0) {
+        this.#currentInput *= -1;
+        this.#currentInput = this.#currentInput ** (1 / this.#radical);
+        this.#currentInput = normalizeResult((this.#currentInput *= -1));
+      } else {
+        this.#currentInput = normalizeResult(this.#currentInput ** (1 / this.#radical));
+      }
+    }
+
+    this.#isEnteringRadical = false;
+    this.#radical = null;
+  }
+
+  memoryClear() {
+    this.#memorizedValue = ZERO;
+    this.isValueMemorized = false;
+    this.updateMemoryRecallButtonStyle();
+  }
+
+  memoryPlus() {
+    this.changeMemorizedValue(OPERATORS.PLUS);
+  }
+
+  memoryMinus() {
+    this.changeMemorizedValue(OPERATORS.SUB);
+  }
+
+  memoryRecall() {
+    if (!this.isValueMemorized) {
+      return;
+    }
+
+    if (this.#operator && this.#isWaitingForArgument) {
+      this.inputDigit(this.#memorizedValue.toString());
+      return;
+    }
+
+    if (this.#accumulator && this.#operator && this.#currentInput) {
+      this.equals();
+    }
+
+    if (
+      this.#currentInput === ZERO ||
+      this.#currentInput === `${ZERO}${DOT}` ||
+      !this.#currentInput
+    ) {
+      this.#currentInput = this.#memorizedValue;
+      this.#isWaitingForArgument = false;
+    } else {
+      this.setOperator(OPERATORS.MUL);
+      this.inputDigit(this.#memorizedValue.toString());
+    }
+  }
+
+  isError() {
+    return this.#currentInput === ERROR;
+  }
+
+  transformZeroDotToZero() {
+    if (this.#currentInput === `${ZERO}${DOT}`) {
+      this.#currentInput = ZERO;
+    }
+  }
+
+  changeMemorizedValue(operator) {
+    if (this.isError() || (operator && this.#isWaitingForArgument)) {
+      return;
+    }
+
+    if (
+      ((this.#accumulator || this.#accumulator === 0) && operator && this.#currentInput) ||
+      this.#isEnteringDegree ||
+      this.#isEnteringRadical
+    ) {
+      this.equals();
+    }
+
+    this.#memorizedValue =
       operator === OPERATORS.SUB
-        ? Number(memorizedValue) - Number(currentInput)
-        : Number(memorizedValue) + Number(currentInput);
+        ? Number(this.#memorizedValue) - Number(this.#currentInput)
+        : Number(this.#memorizedValue) + Number(this.#currentInput);
 
-    isValueMemorized = true;
-    updateMemoryRecallButtonStyle();
+    this.isValueMemorized = true;
   }
 
-  function updateMemoryRecallButtonStyle() {
-    memoryRecallButton.classList = isValueMemorized ? 'active' : '';
+  compute(a, b, operator) {
+    a = Number(a);
+    b = Number(b);
+
+    switch (operator) {
+      case OPERATORS.PLUS: {
+        return normalizeResult(a + b);
+      }
+      case OPERATORS.SUB: {
+        return normalizeResult(a - b);
+      }
+      case OPERATORS.MUL: {
+        return normalizeResult(a * b);
+      }
+      case OPERATORS.DIV: {
+        if (b === 0) {
+          throw Error('Division by 0 is not allowed.');
+        }
+
+        return normalizeResult(a / b);
+      }
+      default: {
+        return normalizeResult(b);
+      }
+    }
   }
-
-  return {
-    getExpression,
-    inputDigit,
-    setOperator,
-    equals,
-    clearAll,
-    percent,
-    signChange,
-    toSquare,
-    toCube,
-    toDegree,
-    tenToDegree,
-    divideOne,
-    factorial,
-    squareRadical,
-    cubeRadical,
-    toRadical,
-    memoryClear,
-    memoryPlus,
-    memoryMinus,
-    memoryRecall,
-  };
-}
-
-function compute(a, b, operator) {
-  a = Number(a);
-  b = Number(b);
-  if (operator === OPERATORS.PLUS) return a + b;
-  if (operator === OPERATORS.SUB) return a - b;
-  if (operator === OPERATORS.MUL) return a * b;
-  if (operator === OPERATORS.DIV) return b === Number(ZERO) ? ERROR : a / b;
-  return b;
-}
-
-function toSymbol(operator) {
-  switch (operator) {
-    case OPERATORS.PLUS:
-      return OPERATORS_SYMBOLS.PLUS;
-    case OPERATORS.SUB:
-      return OPERATORS_SYMBOLS.SUB;
-    case OPERATORS.MUL:
-      return OPERATORS_SYMBOLS.MUL;
-    case OPERATORS.DIV:
-      return OPERATORS_SYMBOLS.DIV;
-    case OPERATORS.PERCENT:
-      return OPERATORS_SYMBOLS.PERCENT;
-    default:
-      return '';
-  }
-}
-
-function isEven(number) {
-  return Number.isInteger(Number(number)) && number % 2 === 0;
 }

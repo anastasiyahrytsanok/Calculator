@@ -1,11 +1,11 @@
 import { Command } from './Command.js';
 
-export class DivideOne extends Command {
+export class Inverse extends Command {
   constructor(calculator) {
     super(calculator);
   }
 
   execute() {
-    this.calculator.divideOne();
+    this.calculator.inverse();
   }
 }

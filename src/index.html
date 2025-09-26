@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,10 +7,13 @@
   </head>
   <body>
     <main class="page">
-      <h1 class="page__title">Calculator</h1>
+      <header class="page__header">
+        <h1 class="page__title">Calculator</h1>
+        <button class="page__theme">Light</button>
+      </header>
 
       <section class="calc">
-        <div class="calc__exp" aria-live="polite">0</div>
+        <div class="calc__display" aria-live="polite"><span class="calc__expression">0</span></div>
 
         <div class="calc__keys" role="group">
           <button data-cmd="memory-clear">MC</button>
